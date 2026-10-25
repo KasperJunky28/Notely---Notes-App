@@ -1,0 +1,141 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notely — Your Notes</title>
+
+    <link rel="stylesheet" href="style.css">
+    <script src="notes.js" defer></script>
+</head>
+<body>
+    <main class="app-shell">
+        <header class="topbar">
+            <a class="brand" href="notes.html">
+                <span class="brand-mark">✧</span>
+                <span>note<span class="brand-accent">ly</span></span>
+            </a>
+
+        <div class="topbar-actions">
+            <div class="user-profile">
+                <img
+                    id="profile-image"
+                    src="../profile_pictures/default.png"
+                    alt="Profile picture">
+
+                <span id="profile-name">*</span>
+
+                <label for="profile-image-input" class="upload-button">
+                    Change photo
+                </label>
+
+                <input
+                    type="file"
+                    id="profile-image-input"
+                    accept="image/png, image/jpeg, image/webp"
+                    hidden>
+            </div>
+
+            <button id="logout-button" class="logout-button">
+                Sign out
+            </button>
+        </div>
+        </header>
+
+        <section class="notes-view">
+            <div class="workspace-heading">
+                <div>
+                    <p class="section-kicker">YOUR WORKSPACE</p>
+                    <h1>Your notes<span class="heading-period">.</span></h1>
+                    <p class="workspace-subtitle">
+                        A home for everything on your mind.
+                    </p>
+                </div>
+            </div>
+
+            <div class="workspace-grid">
+                <aside class="composer-panel">
+                    <div class="panel-heading">
+                        <span class="panel-icon">＋</span>
+                        <div>
+                            <h2>Capture a thought</h2>
+                            <p>Get it out of your head.</p>
+                        </div>
+                    </div>
+
+                    <form id="note-form">
+                        <label for="title">Note title</label>
+                        <input id="title" name="title"
+                               placeholder="Give it a name..." required>
+
+                        <label for="content">What's on your mind?</label>
+                        <textarea id="content" name="content"
+                                  rows="6" required></textarea>
+
+                        <label for="category">Category</label>
+                        <input id="category" name="category"
+                               placeholder="Ideas, Personal, Work" required>
+
+                        <button class="button button-primary button-full"
+                                type="submit">
+                            Save note
+                        </button>
+                    </form>
+
+                    <p id="form-message" class="message"></p>
+                </aside>
+
+                <section class="notes-panel">
+                    <div class="notes-toolbar">
+                        <div>
+                            <p class="section-kicker">YOUR COLLECTION</p>
+                            <h2>
+                                All notes
+                                <span id="notes-count" class="count-badge">0</span>
+                            </h2>
+                        </div>
+
+                        <div class="notes-controls">
+                            <label class="search-box" for="notes-search">
+                                <span>⌕</span>
+                                <input id="notes-search"
+                                       type="search"
+                                       placeholder="Search notes...">
+                            </label>
+
+                            <select id="category-filter">
+                                <option value="">All categories</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div id="notes-list" class="notes-grid"></div>
+
+                    <div id="notes-empty" class="empty-state hidden">
+                        <div class="empty-illustration">✧</div>
+                        <h3 id="empty-title">A fresh page.</h3>
+                        <p id="empty-description">
+                            Your first note is waiting to be written.
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+    
+    <div id="session-expired-modal" class="modal-overlay" hidden>
+        <div class="modal">
+            <h2>ההתחברות פגה</h2>
+            <p>
+                זמן ההתחברות שלך הסתיים.
+                כדי להמשיך להשתמש באפליקציה, יש להתחבר מחדש.
+            </p>
+            <button id="return-to-login-btn" type="button">
+                חזרה למסך ההתחברות
+            </button>
+        </div>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

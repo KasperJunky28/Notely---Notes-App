@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0b1020">
+    <title>Notely — Your thoughts, organized</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="login.js" defer></script>
+</head>
+
+<body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <main class="app-shell">
+        <header class="topbar"><a class="brand" href="#"><span class="brand-mark">✧</span><span>note<span
+                        class="brand-accent">ly</span></span></a>
+            <div class="topbar-right"><span class="status-pill"><span class="status-dot"></span>Your personal
+                    workspace</span><button id="logout-button" class="button button-ghost button-small hidden"
+                    type="button">Sign out ↗</button></div>
+        </header>
+        <section id="auth-view" class="auth-layout">
+            <div class="hero-copy">
+                <div class="eyebrow"><span class="eyebrow-line"></span>A LITTLE MORE CLARITY</div>
+                <h1>Make space for<br><span>your thoughts.</span></h1>
+                <p class="hero-description">A calm place to collect ideas, keep track of the little things, and bring
+                    your thoughts together.</p>
+                <div class="hero-benefits">
+                    <div class="benefit"><span class="benefit-icon">✦</span>Everything in its place</div>
+                    <div class="benefit"><span class="benefit-icon">⌕</span>Simple, focused, yours</div>
+                </div>
+                <div class="hero-decoration">
+                    <div class="decor-card decor-card-back"><span class="decor-dot"></span><span
+                            class="decor-line long"></span><span class="decor-line"></span></div>
+                    <div class="decor-card decor-card-front"><span class="decor-label">A thought for today</span><span
+                            class="decor-title">Small steps still move you forward.</span><span
+                            class="decor-footer">PERSONAL <span>✦</span></span></div>
+                </div>
+            </div>
+            <div class="auth-card">
+                <div class="auth-tabs" role="tablist"><button id="login-tab" class="auth-tab active" type="button"
+                        role="tab" aria-selected="true">Sign in</button><button id="register-tab" class="auth-tab"
+                        type="button" role="tab" aria-selected="false">Create account</button></div>
+                <div class="auth-heading">
+                    <p class="section-kicker" id="auth-kicker">WELCOME BACK</p>
+                    <h2 id="auth-title">Good to see you.</h2>
+                    <p id="auth-subtitle">Pick up right where you left off.</p>
+                </div>
+                <form id="login-form" class="auth-form"><label for="login-email">Email address</label><input
+                        id="login-email" name="email" type="email" autocomplete="email" placeholder="you@example.com"
+                        required>
+                    <label for="login-password">Password</label><input id="login-password" name="password"
+                        type="password" autocomplete="current-password" placeholder="Enter your password" required>
+                    <button class="button button-primary button-full" type="submit"><span>Sign in to
+                            Notely</span><span>→</span></button>
+                </form>
+                <form id="register-form" class="auth-form hidden">
+                    <div class="name-fields">
+                        <div><label for="register-first-name">First name</label><input id="register-first-name"
+                                name="firstName" autocomplete="given-name" placeholder="First name" required></div>
+                        <div><label for="register-last-name">Last name</label><input id="register-last-name"
+                                name="lastName" autocomplete="family-name" placeholder="Last name" required></div>
+                    </div>
+                    <label for="register-email">Email address</label><input id="register-email" name="email"
+                        type="email" autocomplete="email" placeholder="you@example.com" required>
+                    <label for="register-password">Password</label><input id="register-password" name="password"
+                        type="password" autocomplete="new-password" minlength="8" placeholder="At least 8 characters"
+                        required>
+                    <label for="register-profile-image">Profile picture (optional)</label>
+                        <input
+                            id="register-profile-image"
+                            name="profile_image"
+                            type="file"
+                            accept="image/png, image/jpeg, image/webp">
+
+                    <button class="button button-primary button-full" type="submit"><span>Create your
+                            account</span><span>→</span></button>
+                </form>
+                <p id="auth-message" class="message" role="status" aria-live="polite"></p>
+                <p class="auth-footnote">▣ Your notes are private to your account.</p>
+            </div>
+        </section>
+        <section id="notes-view" class="notes-view hidden">
+            <div class="workspace-heading">
+                <div>
+                    <p class="section-kicker">YOUR WORKSPACE</p>
+                    <h1 id="welcome-title">Your notes<span class="heading-period">.</span></h1>
+                    <p class="workspace-subtitle">A home for everything on your mind.</p>
+                </div>
+                <div class="workspace-date"><span>✳</span><span id="today-label">YOUR SPACE, YOUR PACE</span></div>
+            </div>
+            <div class="workspace-grid">
+                <aside class="composer-panel">
+                    <div class="panel-heading"><span class="panel-icon">＋</span>
+                        <div>
+                            <h2>Capture a thought</h2>
+                            <p>Get it out of your head.</p>
+                        </div>
+                    </div>
+                    <form id="note-form"><label for="title">Note title</label><input id="title" name="title"
+                            placeholder="Give it a name..." maxlength="160" required>
+                        <label for="content">What’s on your mind?</label><textarea id="content" name="content"
+                            placeholder="Start writing here..." rows="6" required></textarea>
+                        <label for="category">Category</label><input id="category" name="category"
+                            placeholder="e.g. Ideas, Personal, Work" maxlength="60" required>
+                        <button class="button button-primary button-full" type="submit"><span>Save
+                                note</span><span>↗</span></button>
+                    </form>
+                    <p id="form-message" class="message" role="status" aria-live="polite"></p>
+                    <div class="composer-tip"><span>✦</span>
+                        <p>Keep it simple. One thought at a time.</p>
+                    </div>
+                </aside>
+                <section class="notes-panel" aria-labelledby="notes-heading">
+                    <div class="notes-toolbar">
+                        <div>
+                            <p class="section-kicker">YOUR COLLECTION</p>
+                            <h2 id="notes-heading">All notes <span id="notes-count" class="count-badge">0</span></h2>
+                        </div>
+                        <div class="notes-controls"><label class="search-box" for="notes-search"><span>⌕</span><input
+                                    id="notes-search" type="search" placeholder="Search notes..."
+                                    aria-label="Search notes"></label><select id="category-filter"
+                                aria-label="Filter by category">
+                                <option value="">All categories</option>
+                            </select></div>
+                    </div>
+                    <div id="notes-list" class="notes-grid"></div>
+                    <div id="notes-empty" class="empty-state hidden">
+                        <div class="empty-illustration">✧</div>
+                        <h3 id="empty-title">A fresh page.</h3>
+                        <p id="empty-description">Your first note is waiting to be written.</p>
+                    </div>
+                </section>
+            </div>
+            <footer class="app-footer"><span>Made for a clearer mind.</span><span>NOTELY <b>✦</b></span></footer>
+        </section>
+        <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    </main>
+</body>
+
+</html>
