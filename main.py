@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from pathlib import Path
 from database import Base, engine
 from fastapi.staticfiles import StaticFiles
 from image_utils import PROFILE_PICTURES_DIR
@@ -22,13 +22,8 @@ PROFILE_PICTURES_DIR.mkdir(parents=True, exist_ok=True)
 
 app.mount("/profile_pictures", StaticFiles(directory=str(PROFILE_PICTURES_DIR)),name="profile_pictures")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 app.include_router(notes_router)
 app.include_router(users_router)
+
+FRONTEND_DIR = Path(__file__).parent / "frontend"
+app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
