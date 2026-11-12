@@ -16,7 +16,7 @@ def hash_password(password: str) -> str:
 
 
 @router.get("/users/me", response_model=UserResponse)
-async def get_my_profile(current_user: User = Depends(get_current_user),):
+async def get_my_profile(current_user: User = Depends(get_current_user)):
     return current_user
 
 @router.post("/login", response_model=Token)
@@ -90,7 +90,8 @@ async def create_user(firstName: str = Form(...),
     lastName: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
-    profile_image: UploadFile | None = File(default=None), db: AsyncSession = Depends(get_db)):
+    profile_image: UploadFile | None = File(default=None),
+    db: AsyncSession = Depends(get_db),):
 
     query = select(User).where(User.email == email)
     result = await db.execute(query)
@@ -164,7 +165,8 @@ async def get_users(
     lastName: str | None = None,
     email: str | None = None,
     search: str | None = None,
-    db: AsyncSession = Depends(get_db)):
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
 
     query = select(User)
 
@@ -192,7 +194,8 @@ async def get_users(
 @router.get("/users/{user_id}", response_model=UserResponse)
 async def get_user(
     user_id: int,
-    db: AsyncSession = Depends(get_db)):
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
     
     result = await db.execute(
         select(User).where(User.id == user_id)
@@ -208,7 +211,7 @@ async def get_user(
     return user
 
 @router.delete("/users/{user_id}")
-async def delete_user(user_id: int,db: AsyncSession = Depends(get_db)):
+async def delete_user(user_id: int,db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
     
     result = await db.execute(
         select(User).where(User.id == user_id)
@@ -231,6 +234,7 @@ async def update_user_full(
     user_id: int,
     updated_user: UserUpdate,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     result = await db.execute(
         select(User).where(User.id == user_id)
@@ -257,6 +261,7 @@ async def update_User(
     user_id: int,
     updated_user: UserPatch,
     db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     result = await db.execute(
         select(User).where(User.id == user_id)
