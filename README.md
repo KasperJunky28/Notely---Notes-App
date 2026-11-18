@@ -4,37 +4,6 @@ A personal notes app. Users sign up, log in, and manage their own notes (title, 
 
 The backend is a [FastAPI](https://fastapi.tiangolo.com/) app that exposes a JSON API **and** serves the frontend, so a single server runs everything.
 
-## How it works
-
-```
-Browser ──► FastAPI (uvicorn, port 8000)
-              ├── /                   static frontend (frontend/)
-              ├── /profile_pictures   uploaded profile images
-              ├── /login, /users...   users API
-              ├── /notes...           notes API (login required)
-              └── /docs               interactive API docs (Swagger UI)
-                        │
-                        ▼
-                  SQLite (notes.db) via async SQLAlchemy
-```
-
-- **Frontend** (`frontend/`): plain HTML/CSS/JS. `index.html` + `login.js` handle sign-up and login, `notes.html` + `notes.js` handle the notes screen. The JS calls the API at `http://127.0.0.1:8000`.
-- **Authentication**: a user logs in with email and password (`POST /login`) and receives a JWT access token (valid for 30 minutes). The frontend sends it as `Authorization: Bearer <token>`. Passwords are stored hashed with Argon2. Signing the tokens requires the `JWT_SECRET_KEY` environment variable (see below).
-- **Notes**: every note belongs to a user, and `/notes` endpoints require a valid token.
-- **Profile pictures**: uploaded via `POST /users/me/profile-picture`. Only JPEG, PNG and WebP are accepted, up to 2 MB. Files are stored in `profile_pictures/`, and new users get `default.png`.
-- **Database**: SQLite file `notes.db` in the project folder. Tables are created automatically on startup.
-
-### Project layout
-
-| Path | Purpose |
-| --- | --- |
-| `main.py` | App setup: routers, static files, startup |
-| `routers/users.py`, `routers/notes.py` | API endpoints |
-| `auth.py` | Password hashing, JWT creation and verification |
-| `models.py`, `schemas.py`, `database.py` | DB models, request/response schemas, DB engine |
-| `image_utils.py` | Profile picture validation and storage |
-| `frontend/` | The web UI |
-
 ## Requirements
 
 - [uv](https://docs.astral.sh/uv/) (installs Python and dependencies for you)
@@ -103,6 +72,37 @@ Then open **http://127.0.0.1:8000** in your browser.
 - Use `127.0.0.1`, not `localhost`: the frontend calls the API at `127.0.0.1:8000`, and mixing hosts makes the browser treat requests as cross-origin.
 - `--reload` restarts the server when you edit the code. Leave it out in production.
 - API documentation is available at http://127.0.0.1:8000/docs.
+
+## How it works
+
+```
+Browser ──► FastAPI (uvicorn, port 8000)
+              ├── /                   static frontend (frontend/)
+              ├── /profile_pictures   uploaded profile images
+              ├── /login, /users...   users API
+              ├── /notes...           notes API (login required)
+              └── /docs               interactive API docs (Swagger UI)
+                        │
+                        ▼
+                  SQLite (notes.db) via async SQLAlchemy
+```
+
+- **Frontend** (`frontend/`): plain HTML/CSS/JS. `index.html` + `login.js` handle sign-up and login, `notes.html` + `notes.js` handle the notes screen. The JS calls the API at `http://127.0.0.1:8000`.
+- **Authentication**: a user logs in with email and password (`POST /login`) and receives a JWT access token (valid for 30 minutes). The frontend sends it as `Authorization: Bearer <token>`. Passwords are stored hashed with Argon2. Signing the tokens requires the `JWT_SECRET_KEY` environment variable.
+- **Notes**: every note belongs to a user, and `/notes` endpoints require a valid token.
+- **Profile pictures**: uploaded via `POST /users/me/profile-picture`. Only JPEG, PNG and WebP are accepted, up to 2 MB. Files are stored in `profile_pictures/`, and new users get `default.png`.
+- **Database**: SQLite file `notes.db` in the project folder. Tables are created automatically on startup.
+
+### Project layout
+
+| Path | Purpose |
+| --- | --- |
+| `main.py` | App setup: routers, static files, startup |
+| `routers/users.py`, `routers/notes.py` | API endpoints |
+| `auth.py` | Password hashing, JWT creation and verification |
+| `models.py`, `schemas.py`, `database.py` | DB models, request/response schemas, DB engine |
+| `image_utils.py` | Profile picture validation and storage |
+| `frontend/` | The web UI |
 
 ## Troubleshooting
 
