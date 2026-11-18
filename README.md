@@ -16,7 +16,7 @@ The backend is a [FastAPI](https://fastapi.tiangolo.com/) app that exposes a JSO
 From the project folder:
 
 ```bash
-uv sync
+uv sync 
 ```
 
 This creates the `.venv` virtual environment and installs everything listed in `pyproject.toml` / `uv.lock`.
