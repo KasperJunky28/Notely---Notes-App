@@ -169,7 +169,7 @@ async def get_users(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)):
 
-    query = select(User)
+    query = select(User).where(User.id == current_user.id)
 
     if firstName is not None:
         query = query.where(User.firstName == firstName)
@@ -197,6 +197,12 @@ async def get_user(
     user_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)):
+
+    if user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
     
     result = await db.execute(
         select(User).where(User.id == user_id)
@@ -213,7 +219,13 @@ async def get_user(
 
 @router.delete("/users/{user_id}")
 async def delete_user(user_id: int,db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)):
-    
+
+    if user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
     result = await db.execute(
         select(User).where(User.id == user_id)
     )
@@ -224,7 +236,7 @@ async def delete_user(user_id: int,db: AsyncSession = Depends(get_db), current_u
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
-
+    
     await db.delete(user)
     await db.commit()
 
@@ -237,6 +249,13 @@ async def update_user_full(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+
+    if user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
     result = await db.execute(
         select(User).where(User.id == user_id)
     )
@@ -264,6 +283,13 @@ async def update_User(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
+
+    if user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+    
     result = await db.execute(
         select(User).where(User.id == user_id)
     )
