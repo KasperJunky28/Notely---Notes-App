@@ -267,6 +267,13 @@ async def update_user_full(
             detail="User not found",
         )
 
+    query = select(User).where(User.email == updated_user.email)
+    result = await db.execute(query)
+    existing = result.scalars().first()
+
+    if existing and existing.id != user_id:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email already exists")
+
     user.firstName = updated_user.firstName
     user.lastName = updated_user.lastName
     user.email = updated_user.email
@@ -300,6 +307,14 @@ async def update_User(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
+    
+    if updated_user.email:
+        query = select(User).where(User.email == updated_user.email)
+        result = await db.execute(query)
+        existing = result.scalars().first()
+
+        if existing and existing.id != user_id:
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="User with this email already exists")
 
     update_data = updated_user.model_dump(exclude_unset=True)
 
