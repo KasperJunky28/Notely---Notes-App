@@ -183,9 +183,9 @@ async def get_users(
     if search is not None:
         query = query.where(
             or_(
-                User.firstName.contains(search),
-                User.lastName.contains(search),
-                User.email.contains(search),
+                User.firstName.icontains(search),
+                User.lastName.icontains(search),
+                User.email.icontains(search),
             )
         )
 

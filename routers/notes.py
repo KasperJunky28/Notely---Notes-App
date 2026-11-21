@@ -48,7 +48,7 @@ async def get_notes(category: str | None = None,completed: bool | None = None,se
         query = query.where(Note.completed == completed)
 
     if search is not None:
-        query = query.where(or_(Note.title.contains(search),Note.content.contains(search)))
+        query = query.where(or_(Note.title.icontains(search),Note.content.icontains(search)))
 
     result = await db.execute(query)
     return result.scalars().all()
