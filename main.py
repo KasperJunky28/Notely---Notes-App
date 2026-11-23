@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from database import Base, engine
 from fastapi.staticfiles import StaticFiles
-from image_utils import PROFILE_PICTURES_DIR
+
 
 
 from routers.notes import router as notes_router
@@ -17,11 +17,6 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(lifespan=lifespan)
-
-PROFILE_PICTURES_DIR.mkdir(parents=True, exist_ok=True)
-
-app.mount("/profile_pictures", StaticFiles(directory=str(PROFILE_PICTURES_DIR)),name="profile_pictures")
-
 app.include_router(notes_router)
 app.include_router(users_router)
 

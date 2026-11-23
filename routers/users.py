@@ -6,7 +6,7 @@ from models import User
 from schemas import UserCreate, UserResponse, UserUpdate, UserPatch, LoginRequest, Token
 from pwdlib import PasswordHash
 from auth import create_access_token, get_current_user
-from image_utils import validate_image, save_profile_image, MAX_FILE_SIZE
+from image_utils import validate_image, save_profile_image,delete_profile_image, MAX_FILE_SIZE
 
 router = APIRouter(tags=["users"])
 
@@ -72,17 +72,9 @@ async def upload_proflie_picture(file: UploadFile, db: AsyncSession = Depends(ge
         return current_user
     except Exception:
         await db.rollback()
-
         if image_url:
-            from image_utils import PROFILE_PICTURES_DIR
-            filename = image_url.rsplit("/", 1)[-1]
-            saved_file = PROFILE_PICTURES_DIR / filename
-
-            if saved_file.exists():
-                saved_file.unlink()
-
+            delete_profile_image(image_url)
         raise
-
     finally:
         await file.close()
 
@@ -144,18 +136,9 @@ async def create_user(firstName: str = Form(...),
     
     except Exception:
         await db.rollback()
-
         if image_url is not None:
-            from image_utils import PROFILE_PICTURES_DIR
-
-            filename = image_url.rsplit("/", 1)[-1]
-            saved_file = PROFILE_PICTURES_DIR / filename
-
-            if saved_file.exists():
-                saved_file.unlink()
-
+            delete_profile_image(image_url)
         raise
-
     finally:
         if profile_image is not None:
             await profile_image.close()
@@ -183,9 +166,9 @@ async def get_users(
     if search is not None:
         query = query.where(
             or_(
-                User.firstName.contains(search),
-                User.lastName.contains(search),
-                User.email.contains(search),
+                User.firstName.icontains(search),
+                User.lastName.icontains(search),
+                User.email.icontains(search),
             )
         )
 
