@@ -294,7 +294,7 @@ async function loadProfile() {
     profileName.textContent = `${user.firstName} ${user.lastName}`;
 
     if (user.profile_image) {
-      profileImage.src = `${API_BASE_URL}${user.profile_image}`;
+      profileImage.src = user.profile_image;
     }
   } catch (error) {
     console.error("Could not load profile:", error);
@@ -328,7 +328,7 @@ async function update_picture(file) {
     }
 
     if (data.profile_image) {
-      profileImage.src = `${API_BASE_URL}${data.profile_image}`;
+      profileImage.src = data.profile_image;
     }
   } catch (error) {
     console.error("Could not load image:", error);
