@@ -13,8 +13,6 @@ const notesEmpty = document.getElementById("notes-empty");
 const emptyTitle = document.getElementById("empty-title");
 const emptyDescription = document.getElementById("empty-description");
 const toast = document.getElementById("toast");
-import { inject } from "@vercel/analytics";
-inject();
 
 let allNotes = [];
 let toastTimer;
