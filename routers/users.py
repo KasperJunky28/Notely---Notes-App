@@ -64,12 +64,16 @@ async def upload_proflie_picture(file: UploadFile, db: AsyncSession = Depends(ge
     image_url = None
     try:
         image_url = save_profile_image(contents, extension)
+        old_image_url = current_user.profile_image
         current_user.profile_image = image_url
 
         await db.commit()
         await db.refresh(current_user)
 
+        if old_image_url:
+            delete_profile_image(old_image_url)
         return current_user
+    
     except Exception:
         await db.rollback()
         if image_url:
@@ -219,9 +223,13 @@ async def delete_user(user_id: int,db: AsyncSession = Depends(get_db), current_u
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
-    
+    delete_image = user.profile_image
     await db.delete(user)
     await db.commit()
+
+    if delete_image:
+        delete_profile_image(delete_image)
+
 
     return {"message": "User deleted successfully"}
 

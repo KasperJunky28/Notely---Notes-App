@@ -18,7 +18,3 @@ venv/
 .vscode/
 .DS_Store
 Thumbs.db
-
-# Uploaded profile pictures
-profile_pictures/*
-!profile_pictures/default.png
