@@ -3,9 +3,6 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from database import Base, engine
 from fastapi.staticfiles import StaticFiles
-
-
-
 from routers.notes import router as notes_router
 from routers.users import router as users_router
 
