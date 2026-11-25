@@ -1,5 +1,4 @@
 from io import BytesIO
-from pathlib import Path
 from uuid import uuid4
 import logging
 import os
