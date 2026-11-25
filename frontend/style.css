@@ -1481,3 +1481,45 @@ a:focus-visible {
   background: #263249;
   border-color: #a78bfa;
 }
+/* Profile picture loading spinner */
+.avatar-wrapper {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+}
+
+.avatar-spinner {
+  position: absolute;
+  inset: 0;
+  display: none;
+  border-radius: 50%;
+  border: 3px solid rgba(169, 155, 255, 0.25);
+  border-top-color: var(--primary);
+  background: rgba(11, 16, 32, 0.6);
+  animation: avatar-spin 0.8s linear infinite;
+}
+
+.avatar-wrapper.is-loading .avatar-spinner {
+  display: block;
+}
+
+.avatar-wrapper.is-loading #profile-image {
+  opacity: 0.4;
+}
+
+.upload-button.is-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+@keyframes avatar-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-spinner {
+    animation-duration: 2s;
+  }
+}

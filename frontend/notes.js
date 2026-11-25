@@ -1,8 +1,6 @@
 const API_BASE_URL = "";
 const API_URL = `${API_BASE_URL}/notes`;
-
 const token = sessionStorage.getItem("notely_access_token");
-
 const notesList = document.getElementById("notes-list");
 const noteForm = document.getElementById("note-form");
 const formMessage = document.getElementById("form-message");
@@ -302,11 +300,33 @@ async function loadProfile() {
   }
 }
 
+function setAvatarLoading(isLoading) {
+  const wrapper = document.getElementById("avatar-wrapper");
+  const uploadLabel = document.querySelector(
+    'label[for="profile-image-input"]',
+  );
+
+  wrapper.classList.toggle("is-loading", isLoading);
+  wrapper.setAttribute("aria-busy", String(isLoading));
+  uploadLabel.classList.toggle("is-disabled", isLoading);
+  document.getElementById("profile-image-input").disabled = isLoading;
+}
+
+function loadImage(img, src) {
+  return new Promise((resolve) => {
+    img.addEventListener("load", resolve, { once: true });
+    img.addEventListener("error", resolve, { once: true });
+    img.src = src;
+  });
+}
+
 async function update_picture(file) {
   const profileImage = document.getElementById("profile-image");
 
   const formData = new FormData();
   formData.append("file", file);
+
+  setAvatarLoading(true);
 
   try {
     const response = await fetch(`${API_BASE_URL}/users/me/profile-picture`, {
@@ -328,11 +348,13 @@ async function update_picture(file) {
     }
 
     if (data.profile_image) {
-      profileImage.src = data.profile_image;
+      await loadImage(profileImage, data.profile_image);
     }
   } catch (error) {
     console.error("Could not load image:", error);
     showToast(error.message || "Could not update profile picture.", true);
+  } finally {
+    setAvatarLoading(false);
   }
 }
 
