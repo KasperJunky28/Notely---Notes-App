@@ -11,21 +11,117 @@ const notesEmpty = document.getElementById("notes-empty");
 const emptyTitle = document.getElementById("empty-title");
 const emptyDescription = document.getElementById("empty-description");
 const toast = document.getElementById("toast");
+const toastText = document.getElementById("toast-text");
+const notesSort = document.getElementById("notes-sort");
+const categoryOptions = document.getElementById("category-options");
 
 let allNotes = [];
 let toastTimer;
 
+function hideToast() {
+  window.clearTimeout(toastTimer);
+  toast.classList.remove("visible");
+}
+
+function startToastTimer() {
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(hideToast, 5000);
+}
+
 function showToast(message, isError = false) {
   if (!toast) return;
 
-  window.clearTimeout(toastTimer);
-  toast.textContent = message;
+  toastText.textContent = message;
   toast.classList.toggle("error", isError);
   toast.classList.add("visible");
+  startToastTimer();
+}
 
-  toastTimer = window.setTimeout(() => {
-    toast.classList.remove("visible");
-  }, 5000);
+toast.addEventListener("mouseenter", () => window.clearTimeout(toastTimer));
+toast.addEventListener("mouseleave", () => {
+  if (toast.classList.contains("visible")) startToastTimer();
+});
+document.getElementById("toast-close").addEventListener("click", hideToast);
+
+// ---- Modals (focus management, Esc, focus trap) ----
+let activeModal = null;
+let lastFocused = null;
+
+function openModal(modal, focusEl) {
+  lastFocused = document.activeElement;
+  activeModal = modal;
+  modal.hidden = false;
+  (focusEl || modal.querySelector("input, textarea, button")).focus();
+}
+
+function closeModal(modal = activeModal) {
+  if (!modal) return;
+  modal.hidden = true;
+  if (activeModal === modal) activeModal = null;
+  if (lastFocused && document.contains(lastFocused)) lastFocused.focus();
+}
+
+document.addEventListener("keydown", (event) => {
+  if (!activeModal) return;
+
+  if (event.key === "Escape" && activeModal.id !== "session-expired-modal") {
+    activeModal.dispatchEvent(new Event("modal-dismiss"));
+    closeModal();
+    return;
+  }
+
+  if (event.key === "Tab") {
+    const focusable = [
+      ...activeModal.querySelectorAll("button, input, textarea, select"),
+    ].filter((el) => !el.disabled);
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+});
+
+document.querySelectorAll(".modal-overlay").forEach((overlay) => {
+  overlay.querySelectorAll("[data-close]").forEach((btn) =>
+    btn.addEventListener("click", () => {
+      overlay.dispatchEvent(new Event("modal-dismiss"));
+      closeModal(overlay);
+    }),
+  );
+  overlay.addEventListener("mousedown", (event) => {
+    if (event.target === overlay && overlay.id !== "session-expired-modal") {
+      overlay.dispatchEvent(new Event("modal-dismiss"));
+      closeModal(overlay);
+    }
+  });
+});
+
+function confirmDialog(title, text, okLabel = "Delete") {
+  const modal = document.getElementById("confirm-modal");
+  const ok = document.getElementById("confirm-ok");
+  document.getElementById("confirm-title").textContent = title;
+  document.getElementById("confirm-text").textContent = text;
+  ok.textContent = okLabel;
+
+  return new Promise((resolve) => {
+    const finish = (value) => {
+      ok.removeEventListener("click", onOk);
+      modal.removeEventListener("modal-dismiss", onDismiss);
+      if (value) closeModal(modal);
+      resolve(value);
+    };
+    const onOk = () => finish(true);
+    const onDismiss = () => finish(false);
+    ok.addEventListener("click", onOk);
+    modal.addEventListener("modal-dismiss", onDismiss);
+    openModal(modal, modal.querySelector("[data-close]"));
+  });
 }
 
 function showFormMessage(message, type = "") {
@@ -41,6 +137,20 @@ function createNoteCard(note, index) {
   const article = document.createElement("article");
   article.className = "note-card";
   article.style.setProperty("--card-index", index);
+  article.tabIndex = 0;
+  article.setAttribute("role", "button");
+  article.setAttribute("aria-label", `Edit note: ${note.title}`);
+  article.addEventListener("click", (event) => {
+    if (event.target.closest(".delete-button")) return;
+    openEditModal(note);
+  });
+  article.addEventListener("keydown", (event) => {
+    if (event.target !== article) return;
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openEditModal(note);
+    }
+  });
 
   const top = document.createElement("div");
   top.className = "note-card-top";
@@ -75,15 +185,21 @@ function createNoteCard(note, index) {
 
   const title = document.createElement("h3");
   title.textContent = note.title;
+  title.dir = "auto";
   const content = document.createElement("p");
   content.className = "note-content";
   content.textContent = note.content;
+  content.dir = "auto";
 
   const footer = document.createElement("div");
   footer.className = "note-card-footer";
   const label = document.createElement("span");
-  label.textContent = "NOTE";
-  footer.append(label);
+  const words = note.content.trim().split(/\s+/).filter(Boolean).length;
+  label.textContent = `${words} ${words === 1 ? "WORD" : "WORDS"}`;
+  const hint = document.createElement("span");
+  hint.className = "edit-hint";
+  hint.textContent = "CLICK TO EDIT";
+  footer.append(label, hint);
 
   article.append(top, title, content, footer);
   return article;
@@ -110,6 +226,14 @@ function updateCategoryOptions(notes) {
   }
 
   categoryFilter.value = categories.includes(selected) ? selected : "";
+
+  categoryOptions.replaceChildren(
+    ...categories.map((category) => {
+      const option = document.createElement("option");
+      option.value = category;
+      return option;
+    }),
+  );
 }
 
 function renderNotes() {
@@ -124,6 +248,15 @@ function renderNotes() {
       !selectedCategory || note.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  const sort = notesSort.value;
+  filteredNotes.sort((a, b) =>
+    sort === "title"
+      ? a.title.localeCompare(b.title)
+      : sort === "oldest"
+        ? a.id - b.id
+        : b.id - a.id,
+  );
 
   notesList.replaceChildren();
   notesCount.textContent = String(filteredNotes.length);
@@ -145,8 +278,8 @@ function renderNotes() {
 
   notesEmpty.classList.add("hidden");
 
-  filteredNotes.forEach((note) => {
-    notesList.appendChild(createNoteCard(note));
+  filteredNotes.forEach((note, index) => {
+    notesList.appendChild(createNoteCard(note, Math.min(index, 20)));
   });
 }
 
@@ -159,7 +292,21 @@ function handleUnauthorized(response) {
   return true;
 }
 
+function showSkeletons(count = 6) {
+  notesEmpty.classList.add("hidden");
+  notesList.replaceChildren(
+    ...Array.from({ length: count }, () => {
+      const el = document.createElement("div");
+      el.className = "note-card skeleton";
+      el.setAttribute("aria-hidden", "true");
+      return el;
+    }),
+  );
+  notesList.setAttribute("aria-busy", "true");
+}
+
 async function loadNotes() {
+  showSkeletons();
   try {
     const response = await fetch(API_URL, {
       headers: { Authorization: `Bearer ${token}` },
@@ -184,12 +331,15 @@ async function loadNotes() {
     emptyDescription.textContent =
       "Check that the server is running, then try refreshing.";
     showToast("Could not load notes.", true);
+  } finally {
+    notesList.removeAttribute("aria-busy");
   }
 }
 
 async function deleteNote(note, button) {
-  const confirmed = window.confirm(
-    `Delete "${note.title}"? This can't be undone.`,
+  const confirmed = await confirmDialog(
+    "Delete note?",
+    `"${note.title}" will be permanently deleted. This can't be undone.`,
   );
   if (!confirmed) return;
 
@@ -245,7 +395,8 @@ function showSessionExpiredModal() {
   const modal = document.getElementById("session-expired-modal");
 
   if (modal) {
-    modal.hidden = false;
+    if (activeModal && activeModal !== modal) activeModal.hidden = true;
+    openModal(modal, document.getElementById("return-to-login-btn"));
   }
 }
 
@@ -360,6 +511,15 @@ async function update_picture(file) {
 
 const profileImageInput = document.getElementById("profile-image-input");
 
+document
+  .querySelector('label[for="profile-image-input"]')
+  .addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      if (!profileImageInput.disabled) profileImageInput.click();
+    }
+  });
+
 profileImageInput.addEventListener("change", async () => {
   const file = profileImageInput.files[0];
 
@@ -394,6 +554,7 @@ noteForm.addEventListener("submit", async (event) => {
 
   const submitButton = noteForm.querySelector('button[type="submit"]');
   submitButton.disabled = true;
+  submitButton.textContent = "Saving…";
 
   try {
     const response = await fetch(API_URL, {
@@ -435,11 +596,89 @@ noteForm.addEventListener("submit", async (event) => {
     showFormMessage(error.message || "Could not create note.", "error");
   } finally {
     submitButton.disabled = false;
+    submitButton.textContent = "Save note";
   }
 });
 
-notesSearch.addEventListener("input", renderNotes);
+// ---- Edit ----
+const editModal = document.getElementById("edit-modal");
+const editForm = document.getElementById("edit-form");
+const editMessage = document.getElementById("edit-message");
+let editingNote = null;
+
+function openEditModal(note) {
+  editingNote = note;
+  editMessage.textContent = "";
+  editMessage.className = "message";
+  document.getElementById("edit-title").value = note.title;
+  document.getElementById("edit-content").value = note.content;
+  document.getElementById("edit-category").value = note.category;
+  openModal(editModal, document.getElementById("edit-title"));
+}
+
+editForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  if (!editingNote) return;
+
+  const changes = {
+    title: document.getElementById("edit-title").value.trim(),
+    content: document.getElementById("edit-content").value.trim(),
+    category: document.getElementById("edit-category").value.trim(),
+  };
+  if (!changes.title || !changes.content || !changes.category) {
+    editMessage.textContent = "Please complete all fields.";
+    editMessage.className = "message error";
+    return;
+  }
+
+  const submit = editForm.querySelector('button[type="submit"]');
+  submit.disabled = true;
+  submit.textContent = "Saving…";
+
+  try {
+    const response = await fetch(`${API_URL}/${editingNote.id}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(changes),
+    });
+
+    if (handleUnauthorized(response)) return;
+    if (!response.ok) throw new Error(`Failed to update (${response.status})`);
+
+    const updated = await response.json();
+    allNotes = allNotes.map((n) => (n.id === updated.id ? updated : n));
+    updateCategoryOptions(allNotes);
+    renderNotes();
+    closeModal(editModal);
+    showToast("Note updated.");
+  } catch (error) {
+    console.error(error);
+    editMessage.textContent = "Could not update note.";
+    editMessage.className = "message error";
+  } finally {
+    submit.disabled = false;
+    submit.textContent = "Save changes";
+  }
+});
+
+// ---- Search / filter / sort ----
+let searchTimer;
+notesSearch.addEventListener("input", () => {
+  window.clearTimeout(searchTimer);
+  searchTimer = window.setTimeout(renderNotes, 150);
+});
 categoryFilter.addEventListener("change", renderNotes);
+notesSort.addEventListener("change", renderNotes);
+
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "/" || activeModal) return;
+  if (event.target.matches("input, textarea, select")) return;
+  event.preventDefault();
+  notesSearch.focus();
+});
 
 document.getElementById("logout-button").addEventListener("click", () => {
   sessionStorage.removeItem("notely_access_token");

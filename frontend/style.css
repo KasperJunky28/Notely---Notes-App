@@ -1523,3 +1523,135 @@ a:focus-visible {
     animation-duration: 2s;
   }
 }
+
+/* ---- UI improvements ---- */
+.notes-controls select {
+  min-width: 0;
+}
+
+.note-card[role="button"] {
+  cursor: pointer;
+}
+
+.note-card .edit-hint {
+  opacity: 0;
+  color: var(--primary);
+  transition: opacity 0.15s;
+}
+
+.note-card:hover .edit-hint,
+.note-card:focus-visible .edit-hint {
+  opacity: 1;
+}
+
+.note-card.skeleton {
+  min-height: 185px;
+  background: linear-gradient(
+    100deg,
+    rgba(29, 40, 66, 0.6) 30%,
+    rgba(45, 58, 92, 0.7) 50%,
+    rgba(29, 40, 66, 0.6) 70%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.3s linear infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+
+.upload-button:focus-visible {
+  outline: 3px solid rgba(169, 155, 255, 0.6);
+  outline-offset: 3px;
+}
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.toast #toast-text {
+  flex: 1;
+}
+
+.toast #toast-close {
+  padding: 0 2px;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font-size: 1.15rem;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.toast.visible {
+  pointer-events: auto;
+}
+
+.toast #toast-close:hover {
+  opacity: 1;
+}
+
+/* Modals: shared form + action layout */
+.modal-wide {
+  max-width: 520px;
+  text-align: left;
+}
+
+.modal-wide label {
+  display: block;
+  margin: 14px 0 6px;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.modal-wide input,
+.modal-wide textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  background: #11182b;
+  resize: vertical;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal .modal-secondary {
+  color: var(--text);
+  background: #2c3550;
+}
+
+.modal .modal-secondary:hover {
+  background: #38436a;
+}
+
+.modal .modal-primary {
+  background: #7865ff;
+}
+
+.modal .modal-primary:hover {
+  background: #6552e6;
+}
+
+.modal button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+.modal button:focus-visible {
+  outline: 3px solid rgba(169, 155, 255, 0.6);
+  outline-offset: 2px;
+}
